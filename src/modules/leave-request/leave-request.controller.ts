@@ -4,11 +4,15 @@ import { CreateLeaveRequestDto } from './dto/create-leave-request.dto';
 import { UpdateLeaveRequestDto } from './dto/update-leave-request.dto';
 import { ResponseDto } from '../../common/dto/response.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { EmployeeRole } from '../../database/entities/employee.entity';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('leave-requests')
 export class LeaveRequestController {
     constructor(private readonly leaveRequestService: LeaveRequestService) { }
 
+    @Public()
     @Get()
     async findAll(@Query() paginationDto: PaginationDto) {
         const { page = 1, limit = 10 } = paginationDto;
@@ -28,12 +32,14 @@ export class LeaveRequestController {
         return new ResponseDto(true, 'Leave request fetched successfully', request);
     }
 
+    @Roles(EmployeeRole.ADMIN)
     @Patch(':id')
     async update(@Param('id') id: string, @Body() updateDto: UpdateLeaveRequestDto) {
         const request = await this.leaveRequestService.update(id, updateDto);
         return new ResponseDto(true, 'Leave request updated successfully', request);
     }
 
+    @Roles(EmployeeRole.ADMIN)
     @Delete(':id')
     async remove(@Param('id') id: string) {
         await this.leaveRequestService.remove(id);

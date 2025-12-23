@@ -56,27 +56,18 @@ export class LeaveRequestConsumer {
             this.logger.error(`Error processing leave request: ${error.message}`);
 
             // Retry Strategy
-            const retryStrategy = new ExponentialBackoffRetryStrategy(3, 1000); // 3 attempts, start with 1s
+            const retryStrategy = new ExponentialBackoffRetryStrategy(3, 1000);
             const headers = originalMsg.properties.headers || {};
             const attempt = (headers['x-retry-count'] || 0) + 1;
 
             if (retryStrategy.shouldRetry(attempt, error)) {
                 const delay = retryStrategy.getDelay(attempt);
-                this.logger.log(`Retrying attempts ${attempt} in ${delay}ms`);
+                this.logger.log(`Retrying attempt ${attempt} in ${delay}ms`);
 
-                // In RabbitMQ, delayed retry usually requires a separate Delayed Exchange or simple Timeout + Requeue.
-                // For this demo, we will use a simple setTimeout to simulate delay before Nack(requeue).
-                // CAUTION: This blocks the consumer! Better to publish to a 'wait' queue with TTL.
-                // BUT, given requirements, we keep it simple or assume infrastructure support.
-
-                // Let's use simple sleep for demo purposes to honor the design pattern request
+                // Simple delay (blocks this specific message processing)
                 await new Promise(resolve => setTimeout(resolve, delay));
 
-                // We restart the message by Nack with requeue=true. 
-                // To track attempts, we'd need to republish with updated headers, 
-                // but Nack just puts it back. 
-                // *Better approach*: Publish to self with updated header, then Ack original.
-
+                // Re-publish with incremented retry count
                 channel.publish(
                     originalMsg.fields.exchange,
                     originalMsg.fields.routingKey,
@@ -84,10 +75,13 @@ export class LeaveRequestConsumer {
                     { headers: { ...headers, 'x-retry-count': attempt } }
                 );
                 channel.ack(originalMsg);
-
             } else {
-                this.logger.error('Max retries reached. Sending to DLQ (simulated by Nack false)');
-                channel.nack(originalMsg, false, false); // No requeue -> DLQ
+                // MAX RETRIES REACHED
+                // Since we don't have a DLQ configured, we must log this CRITICALLY so it's not lost.
+                this.logger.error(`CRITICAL: Max retries reached for message. Payload: ${JSON.stringify(JSON.parse(originalMsg.content.toString()))}`);
+
+                // Ack the message to remove it from the queue (prevent infinite loops)
+                channel.ack(originalMsg);
             }
         }
     }

@@ -49,7 +49,21 @@ export class DepartmentService {
     }
 
     async remove(id: string): Promise<void> {
-        const department = await this.findOne(id);
+        const department = await this.departmentRepository.findOne({
+            where: { id },
+            relations: ['employees'],
+        });
+
+        if (!department) {
+            throw new NotFoundException(`Department with ID ${id} not found`);
+        }
+
+        if (department.employees && department.employees.length > 0) {
+            throw new ConflictException(
+                `Cannot delete department. It has ${department.employees.length} employee(s) assigned. Please reassign or remove employees first.`
+            );
+        }
+
         await this.departmentRepository.remove(department);
     }
 }

@@ -4,17 +4,22 @@ import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { ResponseDto } from '../../common/dto/response.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { EmployeeRole } from '../../database/entities/employee.entity';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('departments')
 export class DepartmentController {
     constructor(private readonly departmentService: DepartmentService) { }
 
+    @Roles(EmployeeRole.ADMIN)
     @Post()
     async create(@Body() createDepartmentDto: CreateDepartmentDto) {
         const department = await this.departmentService.create(createDepartmentDto);
         return new ResponseDto(true, 'Department created successfully', department);
     }
 
+    @Public()
     @Get()
     async findAll(@Query() paginationDto: PaginationDto) {
         const { page = 1, limit = 10 } = paginationDto;
@@ -22,18 +27,21 @@ export class DepartmentController {
         return new ResponseDto(true, 'Departments fetched successfully', result.data, result.meta);
     }
 
+    @Public()
     @Get(':id')
     async findOne(@Param('id') id: string) {
         const department = await this.departmentService.findOne(id);
         return new ResponseDto(true, 'Department fetched successfully', department);
     }
 
+    @Roles(EmployeeRole.ADMIN)
     @Patch(':id')
     async update(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
         const department = await this.departmentService.update(id, updateDepartmentDto);
         return new ResponseDto(true, 'Department updated successfully', department);
     }
 
+    @Roles(EmployeeRole.ADMIN)
     @Delete(':id')
     async remove(@Param('id') id: string) {
         await this.departmentService.remove(id);

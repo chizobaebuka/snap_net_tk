@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, ConflictException } from '@nestjs/common';
 import { EmployeeRepository } from './employee.repository';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -23,6 +23,14 @@ export class EmployeeService {
 
         if (!department) {
             throw new NotFoundException('Department not found');
+        }
+
+        const existingEmployee = await this.employeeRepository.findOne({
+            where: { email: createEmployeeDto.email }
+        });
+
+        if (existingEmployee) {
+            throw new ConflictException(`Employee with email ${createEmployeeDto.email} already exists`);
         }
 
         const employee = this.employeeRepository.create({
@@ -84,8 +92,21 @@ export class EmployeeService {
     }
 
     async remove(id: string): Promise<void> {
-        const employee = await this.employeeRepository.findOne({ where: { id } });
-        if (!employee) throw new NotFoundException('Employee not found');
+        const employee = await this.employeeRepository.findOne({
+            where: { id },
+            relations: ['leaveRequests'],
+        });
+
+        if (!employee) {
+            throw new NotFoundException('Employee not found');
+        }
+
+        // Check if employee has leave request history
+        if (employee.leaveRequests && employee.leaveRequests.length > 0) {
+            throw new ConflictException(
+                `Cannot delete employee. They have ${employee.leaveRequests.length} leave request(s) on record. Delete their leave requests first or keep the employee record for audit purposes.`
+            );
+        }
 
         await this.employeeRepository.remove(employee);
         await this.redis.del(`employee:${id}`);

@@ -2,7 +2,9 @@ import { Controller, Get } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Transport, ClientProxy, ClientProxyFactory } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
+import { Public } from '../common/decorators/public.decorator';
 
+@Public()
 @Controller('health')
 export class HealthController {
     private rmqClient: ClientProxy;

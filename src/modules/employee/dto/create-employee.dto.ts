@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsEmail, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsUUID, IsEnum, IsOptional } from 'class-validator';
+import { EmployeeRole } from '../../../database/entities/employee.entity';
 
 export class CreateEmployeeDto {
     @IsString()
@@ -13,4 +14,8 @@ export class CreateEmployeeDto {
 
     @IsString()
     password: string;
+
+    @IsEnum(EmployeeRole)
+    @IsOptional()
+    role?: EmployeeRole;
 }

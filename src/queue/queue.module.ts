@@ -16,10 +16,6 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
                         queue: 'leave_requests_queue',
                         queueOptions: {
                             durable: true,
-                            arguments: {
-                                'x-dead-letter-exchange': '',
-                                'x-dead-letter-routing-key': 'leave_requests_dlq',
-                            },
                         },
                     },
                 }),

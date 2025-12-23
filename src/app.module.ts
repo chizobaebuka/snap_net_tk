@@ -10,8 +10,12 @@ import { LeaveRequest } from './database/entities/leave-request.entity';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from './common/cache/cache.module';
 import { QueueModule } from './queue/queue.module';
+import { ConsumerModule } from './queue/consumer.module';
 import { HealthController } from './health/health.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
   imports: [
@@ -39,12 +43,22 @@ import { AuthModule } from './modules/auth/auth.module';
     }]),
     CacheModule,
     QueueModule,
+    ConsumerModule, // RabbitMQ message handlers
     DepartmentModule,
     EmployeeModule,
     LeaveRequestModule,
     AuthModule,
   ],
   controllers: [HealthController],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule { }
