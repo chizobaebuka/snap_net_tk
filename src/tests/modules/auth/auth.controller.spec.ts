@@ -2,11 +2,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '../../../modules/auth/auth.controller';
 import { AuthService } from '../../../modules/auth/auth.service';
+import { EmployeeService } from '../../../modules/employee/employee.service';
 import { UnauthorizedException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let service: AuthService;
+  let employeeService: EmployeeService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -19,11 +21,18 @@ describe('AuthController', () => {
             login: jest.fn(),
           },
         },
+        {
+          provide: EmployeeService,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
     service = module.get<AuthService>(AuthService);
+    employeeService = module.get<EmployeeService>(EmployeeService);
   });
 
   describe('login', () => {
