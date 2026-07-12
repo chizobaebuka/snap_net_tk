@@ -37,7 +37,11 @@ describe('DepartmentController', () => {
   describe('create', () => {
     it('should create a department', async () => {
       const dto = { name: 'IT' };
-      const expectedResult = { id: '1', ...dto, createdAt: new Date() } as Department;
+      const expectedResult = {
+        id: '1',
+        ...dto,
+        createdAt: new Date(),
+      } as Department;
 
       mockDepartmentService.create.mockResolvedValue(expectedResult);
 
@@ -49,7 +53,10 @@ describe('DepartmentController', () => {
 
   describe('findAll', () => {
     it('should return paginated departments', async () => {
-      const expectedResult = { data: [], meta: { page: 1, limit: 10, total: 0 } };
+      const expectedResult = {
+        data: [],
+        meta: { page: 1, limit: 10, total: 0 },
+      };
       mockDepartmentService.findAll.mockResolvedValue(expectedResult);
 
       const result = await controller.findAll({ page: 1, limit: 10 });

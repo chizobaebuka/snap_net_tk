@@ -1,4 +1,3 @@
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '../../../modules/auth/auth.controller';
 import { AuthService } from '../../../modules/auth/auth.service';
@@ -45,15 +44,23 @@ describe('AuthController', () => {
       jest.spyOn(service, 'login').mockResolvedValue(result);
 
       expect(await controller.login(loginDto)).toBe(result);
-      expect(service.validateUser).toHaveBeenCalledWith(loginDto.email, loginDto.password);
+      expect(service.validateUser).toHaveBeenCalledWith(
+        loginDto.email,
+        loginDto.password,
+      );
       expect(service.login).toHaveBeenCalledWith(user);
     });
 
     it('should throw UnauthorizedException for invalid credentials', async () => {
-      const loginDto = { email: 'test@example.com', password: 'wrong_password' };
+      const loginDto = {
+        email: 'test@example.com',
+        password: 'wrong_password',
+      };
       jest.spyOn(service, 'validateUser').mockResolvedValue(null);
 
-      await expect(controller.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException if email or password missing', async () => {
@@ -66,5 +73,4 @@ describe('AuthController', () => {
       expect(controller).toBeDefined();
     });
   });
-
 });

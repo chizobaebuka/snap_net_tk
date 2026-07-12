@@ -11,4 +11,4 @@ import { Department } from '../../database/entities/department.entity';
   providers: [DepartmentService, DepartmentRepository],
   exports: [DepartmentService, DepartmentRepository],
 })
-export class DepartmentModule { }
+export class DepartmentModule {}

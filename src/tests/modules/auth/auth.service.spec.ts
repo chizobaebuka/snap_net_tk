@@ -1,4 +1,3 @@
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../../../modules/auth/auth.service';
 import { EmployeeRepository } from '../../../modules/employee/employee.repository';
@@ -51,21 +50,37 @@ describe('AuthService', () => {
     });
 
     it('should return null if password does not match', async () => {
-      const user = { id: '1', email: 'test@example.com', password: 'hashed_pass' };
+      const user = {
+        id: '1',
+        email: 'test@example.com',
+        password: 'hashed_pass',
+      };
       jest.spyOn(repo, 'findOne').mockResolvedValue(user as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      const result = await service.validateUser('test@example.com', 'wrong_pass');
+      const result = await service.validateUser(
+        'test@example.com',
+        'wrong_pass',
+      );
       expect(result).toBeNull();
     });
 
     it('should return user (without password) if credentials are valid', async () => {
-      const user = { id: '1', email: 'test@example.com', password: 'hashed_pass', role: 'EMPLOYEE' };
+      const user = {
+        id: '1',
+        email: 'test@example.com',
+        password: 'hashed_pass',
+        role: 'EMPLOYEE',
+      };
       jest.spyOn(repo, 'findOne').mockResolvedValue(user as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       const result = await service.validateUser('test@example.com', 'pass');
-      expect(result).toEqual({ id: '1', email: 'test@example.com', role: 'EMPLOYEE' });
+      expect(result).toEqual({
+        id: '1',
+        email: 'test@example.com',
+        role: 'EMPLOYEE',
+      });
       expect(result).not.toHaveProperty('password');
     });
   });
@@ -78,7 +93,11 @@ describe('AuthService', () => {
 
       const result = await service.login(user);
       expect(result).toEqual({ access_token: token });
-      expect(jwtService.sign).toHaveBeenCalledWith({ email: user.email, sub: user.id, role: user.role });
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        email: user.email,
+        sub: user.id,
+        role: user.role,
+      });
     });
   });
 });

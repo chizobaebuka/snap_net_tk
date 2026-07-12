@@ -4,11 +4,11 @@ import { Department } from '../../database/entities/department.entity';
 
 @Injectable()
 export class DepartmentRepository extends Repository<Department> {
-    constructor(private dataSource: DataSource) {
-        super(Department, dataSource.createEntityManager());
-    }
+  constructor(private dataSource: DataSource) {
+    super(Department, dataSource.createEntityManager());
+  }
 
-    async findByName(name: string): Promise<Department | null> {
-        return this.findOne({ where: { name } });
-    }
+  async findByName(name: string): Promise<Department | null> {
+    return this.findOne({ where: { name } });
+  }
 }

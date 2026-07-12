@@ -3,7 +3,6 @@ import { Employee } from '../../../database/entities/employee.entity';
 import { EmployeeController } from '../../../modules/employee/employee.controller';
 import { EmployeeService } from '../../../modules/employee/employee.service';
 
-
 describe('EmployeeController', () => {
   let controller: EmployeeController;
   let service: EmployeeService;
@@ -38,7 +37,12 @@ describe('EmployeeController', () => {
 
   describe('create', () => {
     it('should create an employee', async () => {
-      const dto = { name: 'John', email: 'john@example.com', departmentId: '1', password: 'password123' };
+      const dto = {
+        name: 'John',
+        email: 'john@example.com',
+        departmentId: '1',
+        password: 'password123',
+      };
       const expectedResult = { id: '1', ...dto } as Employee;
 
       mockEmployeeService.create.mockResolvedValue(expectedResult);
@@ -51,7 +55,10 @@ describe('EmployeeController', () => {
 
   describe('findAll', () => {
     it('should return paginated employees', async () => {
-      const expectedResult = { data: [], meta: { page: 1, limit: 10, total: 0 } };
+      const expectedResult = {
+        data: [],
+        meta: { page: 1, limit: 10, total: 0 },
+      };
       mockEmployeeService.findAll.mockResolvedValue(expectedResult);
 
       const result = await controller.findAll({ page: 1, limit: 10 });
@@ -73,12 +80,22 @@ describe('EmployeeController', () => {
 
   describe('findByDepartment', () => {
     it('should return employees by department', async () => {
-      const expectedResult = { data: [], meta: { page: 1, limit: 10, total: 0 } };
+      const expectedResult = {
+        data: [],
+        meta: { page: 1, limit: 10, total: 0 },
+      };
       mockEmployeeService.findByDepartment.mockResolvedValue(expectedResult);
 
-      const result = await controller.findByDepartment('1', { page: 1, limit: 10 });
+      const result = await controller.findByDepartment('1', {
+        page: 1,
+        limit: 10,
+      });
       expect(result.data).toEqual(expectedResult.data);
-      expect(mockEmployeeService.findByDepartment).toHaveBeenCalledWith('1', 1, 10);
+      expect(mockEmployeeService.findByDepartment).toHaveBeenCalledWith(
+        '1',
+        1,
+        10,
+      );
     });
   });
 });

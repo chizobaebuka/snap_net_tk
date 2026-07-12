@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Param, Patch, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -10,41 +19,52 @@ import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('departments')
 export class DepartmentController {
-    constructor(private readonly departmentService: DepartmentService) { }
+  constructor(private readonly departmentService: DepartmentService) {}
 
-    @Roles(EmployeeRole.ADMIN)
-    @Post()
-    async create(@Body() createDepartmentDto: CreateDepartmentDto) {
-        const department = await this.departmentService.create(createDepartmentDto);
-        return new ResponseDto(true, 'Department created successfully', department);
-    }
+  @Roles(EmployeeRole.ADMIN)
+  @Post()
+  async create(@Body() createDepartmentDto: CreateDepartmentDto) {
+    const department = await this.departmentService.create(createDepartmentDto);
+    return new ResponseDto(true, 'Department created successfully', department);
+  }
 
-    @Public()
-    @Get()
-    async findAll(@Query() paginationDto: PaginationDto) {
-        const { page = 1, limit = 10 } = paginationDto;
-        const result = await this.departmentService.findAll(page, limit);
-        return new ResponseDto(true, 'Departments fetched successfully', result.data, result.meta);
-    }
+  @Public()
+  @Get()
+  async findAll(@Query() paginationDto: PaginationDto) {
+    const { page = 1, limit = 10 } = paginationDto;
+    const result = await this.departmentService.findAll(page, limit);
+    return new ResponseDto(
+      true,
+      'Departments fetched successfully',
+      result.data,
+      result.meta,
+    );
+  }
 
-    @Public()
-    @Get(':id')
-    async findOne(@Param('id') id: string) {
-        const department = await this.departmentService.findOne(id);
-        return new ResponseDto(true, 'Department fetched successfully', department);
-    }
+  @Public()
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const department = await this.departmentService.findOne(id);
+    return new ResponseDto(true, 'Department fetched successfully', department);
+  }
 
-    @Roles(EmployeeRole.ADMIN)
-    @Patch(':id')
-    async update(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
-        const department = await this.departmentService.update(id, updateDepartmentDto);
-        return new ResponseDto(true, 'Department updated successfully', department);
-    }
+  @Roles(EmployeeRole.ADMIN)
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateDepartmentDto: UpdateDepartmentDto,
+  ) {
+    const department = await this.departmentService.update(
+      id,
+      updateDepartmentDto,
+    );
+    return new ResponseDto(true, 'Department updated successfully', department);
+  }
 
-    @Roles(EmployeeRole.ADMIN)
-    @Delete(':id')
-    async remove(@Param('id') id: string) {
-        await this.departmentService.remove(id);
-        return new ResponseDto(true, 'Department deleted successfully');
-    }
+  @Roles(EmployeeRole.ADMIN)
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    await this.departmentService.remove(id);
+    return new ResponseDto(true, 'Department deleted successfully');
+  }
 }

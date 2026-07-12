@@ -1,47 +1,48 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Transport, ClientProxy, ClientProxyFactory } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
+import Redis from 'ioredis';
 import { Public } from '../common/decorators/public.decorator';
 
 @Public()
 @Controller('health')
 export class HealthController {
-    private rmqClient: ClientProxy;
+  constructor(
+    private readonly dataSource: DataSource,
+    @Inject('LEAVE_QUEUE_SERVICE') private readonly rmqClient: ClientProxy,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+  ) {}
 
-    constructor(
-        private readonly dataSource: DataSource,
-        private readonly configService: ConfigService,
-    ) {
-        this.rmqClient = ClientProxyFactory.create({
-            transport: Transport.RMQ,
-            options: {
-                urls: [this.configService.get<string>('RABBITMQ_URI')!],
-                queue: 'leave_requests_queue',
-            }
-        });
+  @Get()
+  async check() {
+    const dbStatus = this.dataSource.isInitialized ? 'UP' : 'DOWN';
+
+    // Reuse the app's long-lived RMQ/Redis clients instead of opening a
+    // fresh broker connection per request - this endpoint is polled
+    // frequently (k8s liveness/readiness probes) and connection churn
+    // adds real load on the broker at scale.
+    let queueStatus = 'UP';
+    try {
+      await this.rmqClient.connect();
+    } catch {
+      queueStatus = 'DOWN';
     }
 
-    @Get()
-    async check() {
-        const dbStatus = this.dataSource.isInitialized ? 'UP' : 'DOWN';
-        let queueStatus = 'UNKNOWN';
-
-        try {
-            await this.rmqClient.connect();
-            queueStatus = 'UP';
-            this.rmqClient.close();
-        } catch (e) {
-            queueStatus = 'DOWN';
-        }
-
-        return {
-            status: 'ok',
-            timestamp: new Date().toISOString(),
-            services: {
-                database: dbStatus,
-                rabbitmq: queueStatus,
-            },
-        };
+    let redisStatus = 'UP';
+    try {
+      await this.redis.ping();
+    } catch {
+      redisStatus = 'DOWN';
     }
+
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      services: {
+        database: dbStatus,
+        rabbitmq: queueStatus,
+        redis: redisStatus,
+      },
+    };
+  }
 }

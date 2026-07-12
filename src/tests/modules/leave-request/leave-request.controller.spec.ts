@@ -35,7 +35,11 @@ describe('LeaveRequestController', () => {
 
   describe('create', () => {
     it('should create a leave request', async () => {
-      const dto = { employeeId: '1', startDate: '2023-01-01', endDate: '2023-01-05' };
+      const dto = {
+        employeeId: '1',
+        startDate: '2023-01-01',
+        endDate: '2023-01-05',
+      };
       const expectedResult = { id: '1', ...dto } as any; // Using any to partial mock
 
       mockLeaveRequestService.create.mockResolvedValue(expectedResult);
@@ -48,7 +52,10 @@ describe('LeaveRequestController', () => {
 
   describe('findAll', () => {
     it('should return paginated leave requests', async () => {
-      const expectedResult = { data: [], meta: { page: 1, limit: 10, total: 0 } };
+      const expectedResult = {
+        data: [],
+        meta: { page: 1, limit: 10, total: 0 },
+      };
       mockLeaveRequestService.findAll.mockResolvedValue(expectedResult);
 
       const result = await controller.findAll({ page: 1, limit: 10 });

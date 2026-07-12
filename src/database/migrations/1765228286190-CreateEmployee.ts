@@ -1,10 +1,9 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateEmployee1765228286190 implements MigrationInterface {
-
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(
-            `CREATE TABLE \`employees\` (
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `CREATE TABLE \`employees\` (
                 \`id\` varchar(36) NOT NULL, 
                 \`createdAt\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), 
                 \`updatedAt\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), 
@@ -17,17 +16,22 @@ export class CreateEmployee1765228286190 implements MigrationInterface {
                 UNIQUE INDEX \`UQ_employees_email\` (\`email\`), 
                 PRIMARY KEY (\`id\`)
             ) ENGINE=InnoDB`,
-        );
-        await queryRunner.query(
-            `ALTER TABLE \`employees\` ADD CONSTRAINT \`FK_employees_departmentId\` FOREIGN KEY (\`departmentId\`) REFERENCES \`departments\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-        );
-    }
+    );
+    await queryRunner.query(
+      `ALTER TABLE \`employees\` ADD CONSTRAINT \`FK_employees_departmentId\` FOREIGN KEY (\`departmentId\`) REFERENCES \`departments\`(\`id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE \`employees\` DROP FOREIGN KEY \`FK_employees_departmentId\``);
-        await queryRunner.query(`DROP INDEX \`UQ_employees_email\` ON \`employees\``);
-        await queryRunner.query(`DROP INDEX \`IDX_employees_departmentId\` ON \`employees\``);
-        await queryRunner.query(`DROP TABLE \`employees\``);
-    }
-
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE \`employees\` DROP FOREIGN KEY \`FK_employees_departmentId\``,
+    );
+    await queryRunner.query(
+      `DROP INDEX \`UQ_employees_email\` ON \`employees\``,
+    );
+    await queryRunner.query(
+      `DROP INDEX \`IDX_employees_departmentId\` ON \`employees\``,
+    );
+    await queryRunner.query(`DROP TABLE \`employees\``);
+  }
 }

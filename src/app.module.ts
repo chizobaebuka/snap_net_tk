@@ -16,11 +16,16 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { envValidationSchema } from './config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validationSchema: envValidationSchema,
+      validationOptions: {
+        abortEarly: false,
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -32,15 +37,24 @@ import { RolesGuard } from './common/guards/roles.guard';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [Department, Employee, LeaveRequest],
-        synchronize: true, // Only for dev, in prod use migrations
+        // Schema is owned by migrations (npm run migrate:up) so multiple
+        // replicas booting concurrently never race a live schema sync.
+        synchronize: false,
         logging: false,
+        extra: {
+          connectionLimit: configService.get<number>('DB_POOL_SIZE') || 10,
+        },
+        retryAttempts: 10,
+        retryDelay: 3000,
       }),
       inject: [ConfigService],
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 10,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     CacheModule,
     QueueModule,
     ConsumerModule, // RabbitMQ message handlers
@@ -61,4 +75,4 @@ import { RolesGuard } from './common/guards/roles.guard';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

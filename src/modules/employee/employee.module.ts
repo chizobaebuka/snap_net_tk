@@ -15,4 +15,4 @@ import { DepartmentModule } from '../department/department.module';
   providers: [EmployeeService, EmployeeRepository],
   exports: [EmployeeService, EmployeeRepository],
 })
-export class EmployeeModule { }
+export class EmployeeModule {}

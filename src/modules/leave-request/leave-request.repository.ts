@@ -4,7 +4,7 @@ import { LeaveRequest } from '../../database/entities/leave-request.entity';
 
 @Injectable()
 export class LeaveRequestRepository extends Repository<LeaveRequest> {
-    constructor(private dataSource: DataSource) {
-        super(LeaveRequest, dataSource.createEntityManager());
-    }
+  constructor(private dataSource: DataSource) {
+    super(LeaveRequest, dataSource.createEntityManager());
+  }
 }
